@@ -19,18 +19,18 @@ export default function VerifyOTP() {
     try {
       const res = await verifyOtp(value, otp);
 
-      Cookies.set("token", res.data.token);
+      // FIXED — use localStorage instead of Cookies
+      localStorage.setItem("token", res.data.token);
 
       const user = res.data.user;
 
-      // If user has no avatar or name → onboarding
       const needsOnboarding =
         !user.name || user.name.trim() === "" || !user.avatar;
 
       if (needsOnboarding) {
-        navigate("/onboarding");
+        navigate("/onboarding", { replace: true });
       } else {
-        navigate("/home");
+        navigate("/home", { replace: true });
       }
     } catch (err) {
       console.log(err);
