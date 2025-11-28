@@ -1,93 +1,77 @@
-// src/dashboard/ChatList.jsx
 import { useEffect, useState } from "react";
-import api from "../api/axiosInstance";
+import api from "../api/axiosInstance"; // adjust path if needed
+import { formatDistanceToNowStrict, parseISO } from "date-fns";
 
 export default function ChatList({ activeChat, setActiveChat }) {
-  const [chats, setChats] = useState([]);
+  const [contacts, setContacts] = useState([]);
+  const [q, setQ] = useState("");
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadChats();
-  }, []);
-
-  const loadChats = async () => {
+  const load = async () => {
     try {
-      const res = await api.get("/chat/list");
-      setChats(res.data.data || []);
+      const res = await api.get("/connections"); // your backend returns contacts
+      setContacts(res.data.contacts || []);
     } catch (err) {
-      console.log("Chat list error:", err);
+      console.error("CHATLIST ERR:", err);
+      setContacts([]);
     } finally {
       setLoading(false);
     }
   };
 
-  const formatTime = (iso) => {
-    if (!iso) return "";
-    const date = new Date(iso);
-    return date.toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
+  useEffect(() => {
+    load();
+  }, []);
 
-  if (loading) {
-    return (
-      <div className="w-80 border-r bg-white flex items-center justify-center">
-        Loading...
-      </div>
-    );
-  }
+  const filtered = contacts.filter((c) =>
+    (c.name || "").toLowerCase().includes(q.trim().toLowerCase())
+  );
+
+  if (loading) return <div className="w-80 p-4">Loading...</div>;
 
   return (
-    <div className="w-80 border-r bg-white flex flex-col">
-      {/* Search */}
-      <div className="p-3">
+    <div className="w-80 border-r h-screen bg-white flex flex-col">
+      <div className="p-3 border-b">
         <input
-          className="w-full bg-gray-100 px-3 py-2 rounded-lg outline-none"
-          placeholder="Search"
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          placeholder="Search or start new chat"
+          className="w-full px-3 py-2 rounded bg-gray-100 outline-none text-sm"
         />
       </div>
 
-      {/* Chat List */}
-      <div className="flex-1 overflow-y-auto">
-        {chats.length === 0 ? (
-          <div className="text-center text-gray-400 mt-10">No chats yet.</div>
+      <div className="flex-1 overflow-auto">
+        {filtered.length === 0 ? (
+          <div className="p-4 text-gray-500">No contacts</div>
         ) : (
-          chats.map((chat) => {
-            const lastMsg = chat.lastMessage?.text || "No messages yet";
-            const time = chat.lastMessage?.createdAt
-              ? formatTime(chat.lastMessage.createdAt)
-              : "";
-
-            return (
-              <div
-                key={chat._id}
-                className={`flex items-center gap-3 px-3 py-3 cursor-pointer border-b 
-                                    ${
-                                      activeChat === chat._id
-                                        ? "bg-gray-100"
-                                        : "hover:bg-gray-50"
-                                    }`}
-                onClick={() => setActiveChat(chat._id)}
-              >
-                <img
-                  src={chat.otherUser?.avatar}
-                  className="w-10 h-10 rounded-full object-cover"
-                />
-
-                <div className="flex-1">
-                  <div className="font-medium text-gray-900">
-                    {chat.otherUser?.name}
-                  </div>
-                  <div className="text-xs text-gray-500 truncate w-40">
-                    {lastMsg}
-                  </div>
+          filtered.map((c) => (
+            <div
+              key={c._id}
+              onClick={() => setActiveChat(c._id)}
+              className={`flex items-center gap-3 p-3 cursor-pointer hover:bg-gray-50 transition ${
+                activeChat === c._id ? "bg-gray-100" : ""
+              }`}
+            >
+              <img
+                src={c.avatar || "https://i.pravatar.cc/100"}
+                alt={c.name}
+                className="w-12 h-12 rounded-full object-cover"
+              />
+              <div className="flex-1 min-w-0">
+                <div className="flex justify-between items-center">
+                  <p className="font-semibold truncate">{c.name}</p>
+                  <small className="text-xs text-gray-400">
+                    {c.lastSeen
+                      ? formatDistanceToNowStrict(parseISO(c.lastSeen), {
+                          addSuffix: true,
+                        })
+                      : ""}
+                  </small>
                 </div>
-
-                <div className="text-[10px] text-gray-400">{time}</div>
+                <p className="text-sm text-gray-500 truncate">{c.status}</p>
               </div>
-            );
-          })
+            </div>
+          ))
         )}
       </div>
     </div>

@@ -1,5 +1,6 @@
 import { Routes, Route, useLocation } from "react-router-dom";
 import ProtectedRoute from "./components/common/ProtectedRoute";
+import { Toaster } from "react-hot-toast";
 
 import Landing from "./pages/Landing/Landing";
 import Login from "./pages/Login/Login";
@@ -39,20 +40,24 @@ export default function App() {
   }, []);
 
   return (
-    <Routes>
-      <Route path="/" element={<Landing />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/verify" element={<VerifyOTP />} />
-      <Route path="/onboarding" element={<Onboarding />} />
+    <>
+      <Toaster position="top-center" />
 
-      <Route element={<ProtectedRoute />}>
-        <Route path="/home" element={<Home />} />
-        <Route path="/profile" element={<UserProfile />} />
-        <Route path="/qr" element={<ShowQR />} />
-        <Route path="/scan" element={<ScanQR />} />
-        <Route path="/pending" element={<PendingRequests />} />
-        <Route path="/connections" element={<Connections />} />
-      </Route>
-    </Routes>
+      <Routes>
+        <Route path="/" element={<Landing />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/verify" element={<VerifyOTP />} />
+        <Route path="/onboarding" element={<Onboarding />} />
+
+        <Route element={<ProtectedRoute />}>
+          <Route path="/home" element={<Home />} />
+          <Route path="/profile" element={<UserProfile />} />
+          <Route path="/qr" element={<ShowQR />} />
+          <Route path="/scan" element={<ScanQR />} />
+          <Route path="/pending" element={<PendingRequests />} />
+          <Route path="/connections" element={<Connections />} />
+        </Route>
+      </Routes>
+    </>
   );
 }
