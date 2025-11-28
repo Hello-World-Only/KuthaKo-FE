@@ -19,9 +19,11 @@ export default function ScanQR() {
   }, []);
 
   const scanFrame = () => {
-    if (!webcamRef.current) return;
+    const webcam = webcamRef.current;
+    if (!webcam) return;
 
-    const video = webcamRef.current.video;
+    const video = webcam.video;
+
     if (!video || video.readyState !== 4) return;
 
     const canvas = canvasRef.current;
@@ -69,11 +71,17 @@ export default function ScanQR() {
           screenshotFormat="image/png"
           className="w-full h-full object-cover"
           videoConstraints={{ facingMode: "environment" }}
+          playsInline // REQUIRED FOR SAMSUNG/ANDROID
         />
-        <canvas ref={canvasRef} className="absolute top-0 left-0" />
+        <canvas
+          ref={canvasRef}
+          className="absolute top-0 left-0 w-full h-full"
+        />
       </div>
 
-      <p className="text-gray-500 text-sm">Point your camera at the QR code.</p>
+      <p className="text-gray-500 text-sm">
+        Point your phone camera at the QR code on the other device.
+      </p>
     </div>
   );
 }
