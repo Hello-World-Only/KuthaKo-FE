@@ -20,56 +20,51 @@ export default function ChatWindow({ activeChat, setActiveChat }) {
     }, 50);
   };
 
-  // If chatId exists → load messages
   const loadChat = async (id) => {
     try {
       const res = await api.get(`/chat/${id}/messages`);
 
-      setMessages(res.data.messages || []);
+      setChatId(id);
+      setMessages(res.data.messages);
 
-      const partner =
-        res.data.chat?.members?.find((m) => m._id !== user._id) || null;
+      const partner = res.data.chat.participants.find(
+        (m) => m._id !== user._id
+      );
 
       setOtherUser(partner);
-      setChatId(id);
       scrollBottom();
     } catch (err) {
-      console.log("Chat not found yet.");
+      console.log("CHAT NOT READY");
     }
   };
 
-  // When user clicks on a contact
   useEffect(() => {
     if (!activeChat) return;
 
+    if (activeChat.type === "chat") {
+      loadChat(activeChat.chatId);
+      return;
+    }
+
     if (activeChat.type === "user") {
-      // create new chat
       api
-        .post("/chat/send", {
-          receiverId: activeChat.id,
-          text: "",
-          type: "text",
-        })
+        .post("/chat/start", { receiverId: activeChat.userId })
         .then((res) => {
-          const newId = res.data.chatId;
-          setChatId(newId);
+          const id = res.data.chatId;
 
           setActiveChat({
             type: "chat",
-            id: newId,
+            chatId: id,
             name: activeChat.name,
             avatar: activeChat.avatar,
           });
 
-          loadChat(newId);
+          loadChat(id);
         })
-        .catch((err) => console.error("CREATE CHAT ERR:", err));
-    } else {
-      loadChat(activeChat.id);
+        .catch((err) => console.error("START CHAT ERR", err));
     }
   }, [activeChat]);
 
-  // Send message
   const sendMessage = async () => {
     if (!input.trim() || !otherUser) return;
 
@@ -89,10 +84,17 @@ export default function ChatWindow({ activeChat, setActiveChat }) {
     }
   };
 
-  if (!otherUser)
+  if (!activeChat)
     return (
       <div className="h-full flex items-center justify-center text-gray-400">
         Select a chat to start messaging
+      </div>
+    );
+
+  if (!otherUser)
+    return (
+      <div className="h-full flex items-center justify-center text-gray-400">
+        Loading chat...
       </div>
     );
 
@@ -100,10 +102,10 @@ export default function ChatWindow({ activeChat, setActiveChat }) {
     <div className="flex flex-col h-full">
       <div className="p-3 border-b flex items-center gap-3">
         <img
-          src={activeChat.avatar}
+          src={otherUser.avatar}
           className="w-10 h-10 rounded-full object-cover"
         />
-        <p className="font-semibold">{activeChat.name}</p>
+        <p className="font-semibold">{otherUser.name}</p>
       </div>
 
       <div
@@ -121,7 +123,7 @@ export default function ChatWindow({ activeChat, setActiveChat }) {
                   : "bg-white border mr-auto"
               }`}
             >
-              {msg.text || "<empty>"}
+              {msg.text}
             </div>
           );
         })}

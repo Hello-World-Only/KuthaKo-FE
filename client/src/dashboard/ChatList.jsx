@@ -1,13 +1,16 @@
 import { useState, useEffect } from "react";
 import api from "../api/axiosInstance";
-import { formatDistanceToNowStrict, parseISO } from "date-fns";
 
 export default function ChatList({ activeChat, setActiveChat }) {
   const [contacts, setContacts] = useState([]);
   const [chatMap, setChatMap] = useState({});
   const [q, setQ] = useState("");
 
-  // Load connections
+  useEffect(() => {
+    loadConnections();
+    loadChats();
+  }, []);
+
   const loadConnections = async () => {
     try {
       const res = await api.get("/connections");
@@ -17,15 +20,18 @@ export default function ChatList({ activeChat, setActiveChat }) {
     }
   };
 
-  // Load chats
   const loadChats = async () => {
     try {
       const res = await api.get("/chat/list");
 
       const map = {};
+
       (res.data.chats || []).forEach((chat) => {
-        const other = chat.otherUser?._id;
-        if (other) map[other] = chat; // save chat by userId
+        if (!chat) return;
+        if (!chat.otherUser) return;
+        if (!chat.otherUser._id) return;
+
+        map[chat.otherUser._id] = chat;
       });
 
       setChatMap(map);
@@ -33,11 +39,6 @@ export default function ChatList({ activeChat, setActiveChat }) {
       console.error("CHAT LIST ERR:", err);
     }
   };
-
-  useEffect(() => {
-    loadConnections();
-    loadChats();
-  }, []);
 
   const filtered = contacts.filter((c) =>
     (c.name || "").toLowerCase().includes(q.toLowerCase())
@@ -55,56 +56,46 @@ export default function ChatList({ activeChat, setActiveChat }) {
       </div>
 
       <div className="flex-1 overflow-auto">
-        {filtered.length === 0 ? (
-          <p className="p-4 text-gray-500">No contacts</p>
-        ) : (
-          filtered.map((c) => {
-            const chat = chatMap[c._id];
-            const lastMsg = chat?.lastMessage;
+        {filtered.map((c) => {
+          const chat = chatMap[c._id];
 
-            return (
-              <div
-                key={c._id}
-                onClick={() =>
-                  setActiveChat({
-                    type: chat ? "chat" : "user",
-                    id: chat ? chat.chatId : c._id, // chatId or userId
-                    name: c.name,
-                    avatar: c.avatar,
-                  })
-                }
-                className={`flex items-center gap-3 p-3 cursor-pointer hover:bg-gray-50 border-b ${
-                  activeChat?.id === (chat?.chatId || c._id)
-                    ? "bg-gray-100"
-                    : ""
-                }`}
-              >
-                <img
-                  src={c.avatar || "https://i.pravatar.cc/100"}
-                  className="w-12 h-12 rounded-full object-cover"
-                />
+          return (
+            <div
+              key={c._id}
+              onClick={() =>
+                setActiveChat(
+                  chat
+                    ? {
+                        type: "chat",
+                        chatId: chat.chatId,
+                        name: c.name,
+                        avatar: c.avatar,
+                        otherUserId: c._id,
+                      }
+                    : {
+                        type: "user",
+                        userId: c._id,
+                        name: c.name,
+                        avatar: c.avatar,
+                      }
+                )
+              }
+              className="flex items-center gap-3 p-3 cursor-pointer hover:bg-gray-50 border-b"
+            >
+              <img
+                src={c.avatar}
+                className="w-12 h-12 rounded-full object-cover"
+              />
 
-                <div className="flex-1 min-w-0">
-                  <div className="flex justify-between">
-                    <p className="font-semibold truncate">{c.name}</p>
-                    {lastMsg?.createdAt && (
-                      <small className="text-xs text-gray-400">
-                        {formatDistanceToNowStrict(
-                          parseISO(lastMsg.createdAt),
-                          { addSuffix: true }
-                        )}
-                      </small>
-                    )}
-                  </div>
-
-                  <p className="truncate text-sm text-gray-500">
-                    {lastMsg?.text || c.status}
-                  </p>
-                </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold truncate">{c.name}</p>
+                <p className="truncate text-sm text-gray-500">
+                  {chat?.lastMessage?.text || "Start chat"}
+                </p>
               </div>
-            );
-          })
-        )}
+            </div>
+          );
+        })}
       </div>
     </div>
   );

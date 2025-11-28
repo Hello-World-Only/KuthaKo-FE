@@ -14,12 +14,15 @@ import Connections from "../Connections/Connections";
 
 export default function Home() {
   const [user, setUser] = useAtom(userAtom);
+
   const [activeChat, setActiveChat] = useState(null);
-  const [screen, setScreen] = useState("chat"); // chat | scan | qr | pending | connections | profile
+
+  // chat | scan | qr | pending | connections | profile
+  const [screen, setScreen] = useState("chat");
 
   useEffect(() => {
     api
-      .get("/me")
+      .get("/users/me")
       .then((res) => setUser(res.data.data))
       .catch(() => setUser(null));
   }, []);
@@ -57,21 +60,28 @@ export default function Home() {
 
   return (
     <div className="h-screen w-full flex bg-[#f1f1f1]">
-      {/* LEFT SIDEBAR */}
-      <LeftSidebar onNavigate={setScreen} user={user} />
+      {/* Sidebar */}
+      <LeftSidebar
+        onNavigate={(target) => {
+          setScreen(target);
+          if (target !== "chat") setActiveChat(null);
+        }}
+        user={user}
+      />
 
-      {/* CHAT LIST — only shown on chat screen */}
+      {/* Show ChatList ONLY on chat screen */}
       {screen === "chat" && (
         <ChatList
           activeChat={activeChat}
-          setActiveChat={(chatObject) => {
-            setActiveChat(chatObject);
+          setActiveChat={(chatInfo) => {
+            console.log("CLICKED CONTACT:", chatInfo);
+            setActiveChat(chatInfo);
             setScreen("chat");
           }}
         />
       )}
 
-      {/* MAIN SCREEN */}
+      {/* Main content */}
       <div className="flex-1 overflow-y-auto bg-white">{renderMain()}</div>
     </div>
   );

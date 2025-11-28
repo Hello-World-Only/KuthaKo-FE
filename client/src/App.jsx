@@ -34,7 +34,7 @@ export default function App() {
   // Load logged-in user
   useEffect(() => {
     api
-      .get("/me")
+      .get("/users/me")
       .then((res) => setUser(res.data.data))
       .catch(() => setUser(null));
   }, []);
