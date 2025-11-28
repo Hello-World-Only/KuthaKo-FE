@@ -15,7 +15,7 @@ import ScanQR from "./pages/QR/ScanQR";
 import PendingRequests from "./pages/QR/PendingRequests";
 import Connections from "./pages/Connections/Connections";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useSetAtom } from "jotai";
 import { userAtom } from "./state/userAtom";
 import api from "./api/axiosInstance";
@@ -25,24 +25,47 @@ export default function App() {
   const location = useLocation();
   const setUser = useSetAtom(userAtom);
 
+  const [authLoaded, setAuthLoaded] = useState(false);
+
+  // ---------- AUTO PAGE TITLES ----------
   useEffect(() => {
     const title = pageTitles[location.pathname] || "KuthaKo";
     document.title = title;
   }, [location.pathname]);
 
+  // ---------- LOAD USER (NO REDIRECT UNTIL DONE) ----------
   useEffect(() => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      setUser(null);
+      setAuthLoaded(true);
+      return;
+    }
+
     api
       .get("/users/me")
       .then((res) => setUser(res.data.data))
-      .catch(() => setUser(null));
+      .catch(() => {
+        localStorage.removeItem("token");
+        setUser(null);
+      })
+      .finally(() => setAuthLoaded(true));
   }, []);
+
+  // ---------- PREVENT ROUTES FROM RENDERING UNTIL AUTH LOADED ----------
+  if (!authLoaded) {
+    return (
+      <div className="p-10 text-center text-gray-500">Checking session...</div>
+    );
+  }
 
   return (
     <>
       <Toaster position="top-center" />
 
       <Routes>
-        {/* ---------- PUBLIC ROUTES (block when logged in) ---------- */}
+        {/* ---------- PUBLIC ROUTES ---------- */}
         <Route
           path="/"
           element={
@@ -79,7 +102,7 @@ export default function App() {
           }
         />
 
-        {/* ---------- PROTECTED ROUTES ---------- */}
+        {/* ---------- PRIVATE ROUTES ---------- */}
         <Route element={<ProtectedRoute />}>
           <Route path="/home" element={<Home />} />
           <Route path="/profile" element={<UserProfile />} />
