@@ -41,33 +41,76 @@ export default function VerifyOTP() {
   };
 
   return (
-    <div style={{ padding: 20 }}>
-      <h1>Verify OTP</h1>
-      <p>Sent to: {value}</p>
+    <>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 p-5">
+        <div className="w-full max-w-sm bg-white rounded-2xl shadow-xl p-8">
+          <h1 className="text-2xl font-semibold text-gray-900 text-center mb-2">
+            Verify OTP
+          </h1>
 
-      <form onSubmit={handleVerify} style={{ marginTop: 20 }}>
-        <input
-          type="text"
-          placeholder="Enter OTP"
-          value={otp}
-          onChange={(e) => setOtp(e.target.value)}
-          style={{ padding: 10, width: "100%", marginBottom: 20 }}
-        />
+          <p className="text-center text-gray-500 mb-6">Sent to: {value}</p>
 
-        <button
-          type="submit"
-          disabled={loading}
-          style={{
-            padding: 12,
-            width: "100%",
-            background: "black",
-            color: "white",
-            opacity: loading ? 0.7 : 1,
-          }}
-        >
-          {loading ? "Verifying..." : "Verify & Continue"}
-        </button>
-      </form>
-    </div>
+          <form onSubmit={handleVerify} className="mt-4">
+            <input
+              type="text"
+              placeholder="Enter OTP"
+              value={otp}
+              onChange={(e) => setOtp(e.target.value)}
+              className="
+          w-full p-3.5 mb-5
+          bg-gray-50 border border-gray-200 
+          rounded-xl outline-none
+          focus:border-gray-400 focus:bg-white
+          text-gray-800 text-base
+        "
+            />
+
+            <button
+              type="submit"
+              disabled={loading}
+              className={`
+          w-full p-3.5 rounded-xl text-white font-semibold text-base
+          shadow-md transition-all
+          ${
+            loading
+              ? "bg-gray-700/70 cursor-wait"
+              : "bg-black hover:bg-gray-900 active:scale-95"
+          }
+        `}
+            >
+              {loading ? "Verifying..." : "Verify & Continue"}
+            </button>
+          </form>
+        </div>
+      </div>
+    </>
+    // <div style={{ padding: 20 }}>
+    //   <h1>Verify OTP</h1>
+    //   <p>Sent to: {value}</p>
+
+    //   <form onSubmit={handleVerify} style={{ marginTop: 20 }}>
+    //     <input
+    //       type="text"
+    //       placeholder="Enter OTP"
+    //       value={otp}
+    //       onChange={(e) => setOtp(e.target.value)}
+    //       style={{ padding: 10, width: "100%", marginBottom: 20 }}
+    //     />
+
+    //     <button
+    //       type="submit"
+    //       disabled={loading}
+    //       style={{
+    //         padding: 12,
+    //         width: "100%",
+    //         background: "black",
+    //         color: "white",
+    //         opacity: loading ? 0.7 : 1,
+    //       }}
+    //     >
+    //       {loading ? "Verifying..." : "Verify & Continue"}
+    //     </button>
+    //   </form>
+    // </div>
   );
 }

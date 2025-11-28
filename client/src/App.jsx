@@ -1,5 +1,6 @@
 import { Routes, Route, useLocation } from "react-router-dom";
-import ProtectedRoute from "./components/common/ProtectedRoute";
+import ProtectedRoute from "./pages/auth/PrivateRoute";
+import PublicRoute from "./pages/auth/PublicRoute";
 import { Toaster } from "react-hot-toast";
 
 import Landing from "./pages/Landing/Landing";
@@ -18,20 +19,17 @@ import { useEffect } from "react";
 import { useSetAtom } from "jotai";
 import { userAtom } from "./state/userAtom";
 import api from "./api/axiosInstance";
-
 import { pageTitles } from "./utils/pageTitles";
 
 export default function App() {
   const location = useLocation();
   const setUser = useSetAtom(userAtom);
 
-  // Auto page titles
   useEffect(() => {
     const title = pageTitles[location.pathname] || "KuthaKo";
     document.title = title;
   }, [location.pathname]);
 
-  // Load logged-in user
   useEffect(() => {
     api
       .get("/users/me")
@@ -44,11 +42,44 @@ export default function App() {
       <Toaster position="top-center" />
 
       <Routes>
-        <Route path="/" element={<Landing />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/verify" element={<VerifyOTP />} />
-        <Route path="/onboarding" element={<Onboarding />} />
+        {/* ---------- PUBLIC ROUTES (block when logged in) ---------- */}
+        <Route
+          path="/"
+          element={
+            <PublicRoute>
+              <Landing />
+            </PublicRoute>
+          }
+        />
 
+        <Route
+          path="/login"
+          element={
+            <PublicRoute>
+              <Login />
+            </PublicRoute>
+          }
+        />
+
+        <Route
+          path="/verify"
+          element={
+            <PublicRoute>
+              <VerifyOTP />
+            </PublicRoute>
+          }
+        />
+
+        <Route
+          path="/onboarding"
+          element={
+            <PublicRoute>
+              <Onboarding />
+            </PublicRoute>
+          }
+        />
+
+        {/* ---------- PROTECTED ROUTES ---------- */}
         <Route element={<ProtectedRoute />}>
           <Route path="/home" element={<Home />} />
           <Route path="/profile" element={<UserProfile />} />

@@ -57,10 +57,19 @@ export default function ScanQR() {
   };
 
   return (
-    <div className="flex flex-col items-center p-4 space-y-4">
-      <h2 className="text-xl font-semibold">Scan QR Code</h2>
+    <div className="h-full flex flex-col items-center justify-center p-6 bg-white">
+      {/* Title */}
+      <h2 className="text-2xl font-semibold text-gray-800 mb-4">
+        Scan QR Code
+      </h2>
 
-      <div className="relative w-72 h-72 rounded-lg overflow-hidden shadow">
+      {/* Webcam Box */}
+      <div
+        className="
+      relative w-72 h-72 rounded-xl overflow-hidden 
+      shadow-lg border border-gray-200 bg-black
+    "
+      >
         <Webcam
           ref={webcamRef}
           audio={false}
@@ -74,9 +83,44 @@ export default function ScanQR() {
           ref={canvasRef}
           className="absolute top-0 left-0 w-full h-full"
         />
+
+        {/* QR Scan Overlay corners */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-2 left-2 w-10 h-10 border-t-4 border-l-4 border-green-400 rounded-sm"></div>
+          <div className="absolute top-2 right-2 w-10 h-10 border-t-4 border-r-4 border-green-400 rounded-sm"></div>
+          <div className="absolute bottom-2 left-2 w-10 h-10 border-b-4 border-l-4 border-green-400 rounded-sm"></div>
+          <div className="absolute bottom-2 right-2 w-10 h-10 border-b-4 border-r-4 border-green-400 rounded-sm"></div>
+        </div>
       </div>
 
-      <p className="text-gray-500 text-sm">Point your camera at the QR code.</p>
+      {/* Subtitle */}
+      <p className="text-gray-500 text-sm mt-4">
+        Point your camera at the QR code.
+      </p>
     </div>
   );
+
+  // return (
+  //   <div className="flex flex-col items-center p-4 space-y-4">
+  //     <h2 className="text-xl font-semibold">Scan QR Code</h2>
+
+  //     <div className="relative w-72 h-72 rounded-lg overflow-hidden shadow">
+  //       <Webcam
+  //         ref={webcamRef}
+  //         audio={false}
+  //         playsInline
+  //         screenshotFormat="image/png"
+  //         className="w-full h-full object-cover"
+  //         videoConstraints={{ facingMode: "environment" }}
+  //       />
+
+  //       <canvas
+  //         ref={canvasRef}
+  //         className="absolute top-0 left-0 w-full h-full"
+  //       />
+  //     </div>
+
+  //     <p className="text-gray-500 text-sm">Point your camera at the QR code.</p>
+  //   </div>
+  // );
 }

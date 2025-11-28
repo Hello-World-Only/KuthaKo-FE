@@ -47,27 +47,40 @@ export default function ShowQR() {
   }, []);
 
   return (
-    <div style={{ padding: 20, textAlign: "center" }}>
-      <h1>Your QR Code</h1>
+    <div className="h-full flex flex-col items-center justify-center p-6 bg-white text-center">
+      {/* Title */}
+      <h1 className="text-2xl font-semibold text-gray-800">Your QR Code</h1>
 
+      {/* QR Box */}
       {qrToken ? (
         <div
-          style={{
-            background: "white",
-            padding: 20,
-            display: "inline-block",
-            marginTop: 20,
-          }}
+          className="
+          bg-white p-6 mt-6 rounded-xl shadow-md border border-gray-200 
+          inline-flex items-center justify-center
+        "
         >
-          <QRCodeCanvas value={qrToken} size={200} />
+          <QRCodeCanvas value={qrToken} size={220} />
         </div>
       ) : (
-        <p>Generating...</p>
+        <p className="text-gray-500 mt-6 text-sm">Generating…</p>
       )}
 
-      <p style={{ marginTop: 15, fontSize: 14, color: "#666" }}>
-        Expires in: <strong>{remaining}s</strong>
+      {/* Timer */}
+      <p className="mt-4 text-gray-600 text-sm">
+        Expires in: <span className="font-semibold">{remaining}s</span>
       </p>
+
+      {/* Regenerate Button (Optional) */}
+      <button
+        onClick={generateQR}
+        className="
+        mt-6 px-5 py-2 rounded-full
+        bg-gray-900 text-white
+        hover:bg-black transition
+      "
+      >
+        Refresh QR
+      </button>
     </div>
   );
 }
