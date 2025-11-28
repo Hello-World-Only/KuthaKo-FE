@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import api from "../api/axiosInstance";
 import { formatDistanceToNowStrict, parseISO } from "date-fns";
 
@@ -25,7 +25,7 @@ export default function ChatList({ activeChat, setActiveChat }) {
       const map = {};
       (res.data.chats || []).forEach((chat) => {
         const other = chat.otherUser?._id;
-        if (other) map[other] = chat; // store chat by userId
+        if (other) map[other] = chat; // save chat by userId
       });
 
       setChatMap(map);
@@ -60,15 +60,23 @@ export default function ChatList({ activeChat, setActiveChat }) {
         ) : (
           filtered.map((c) => {
             const chat = chatMap[c._id];
-            const chatId = chat ? chat.chatId : c._id;
             const lastMsg = chat?.lastMessage;
 
             return (
               <div
                 key={c._id}
-                onClick={() => setActiveChat(chatId)}
+                onClick={() =>
+                  setActiveChat({
+                    type: chat ? "chat" : "user",
+                    id: chat ? chat.chatId : c._id, // chatId or userId
+                    name: c.name,
+                    avatar: c.avatar,
+                  })
+                }
                 className={`flex items-center gap-3 p-3 cursor-pointer hover:bg-gray-50 border-b ${
-                  activeChat === chatId ? "bg-gray-100" : ""
+                  activeChat?.id === (chat?.chatId || c._id)
+                    ? "bg-gray-100"
+                    : ""
                 }`}
               >
                 <img
@@ -83,9 +91,7 @@ export default function ChatList({ activeChat, setActiveChat }) {
                       <small className="text-xs text-gray-400">
                         {formatDistanceToNowStrict(
                           parseISO(lastMsg.createdAt),
-                          {
-                            addSuffix: true,
-                          }
+                          { addSuffix: true }
                         )}
                       </small>
                     )}
