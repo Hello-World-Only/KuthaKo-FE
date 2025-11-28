@@ -1,0 +1,73 @@
+import { useEffect, useState, useRef } from "react";
+import api from "../../api/axiosInstance";
+import { QRCodeCanvas } from "qrcode.react";
+
+export default function ShowQR() {
+  const [qrToken, setQrToken] = useState("");
+  const [expiresAt, setExpiresAt] = useState(null);
+  const [remaining, setRemaining] = useState(0);
+  const timerRef = useRef(null);
+
+  const generateQR = async () => {
+    try {
+      const res = await api.post("/qr/generate");
+
+      // backend response uses root-level fields, NOT "data"
+      const data = res.data;
+
+      setQrToken(data.qrToken);
+      setExpiresAt(data.expiresAt);
+
+      const expiresIn = Math.floor(
+        (new Date(data.expiresAt) - new Date()) / 1000
+      );
+      setRemaining(expiresIn);
+
+      if (timerRef.current) clearInterval(timerRef.current);
+
+      timerRef.current = setInterval(() => {
+        setRemaining((prev) => {
+          if (prev <= 1) {
+            clearInterval(timerRef.current);
+            generateQR();
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    } catch (err) {
+      console.log("QR ERROR:", err.response?.data || err.message);
+      alert(err.response?.data?.message || "Failed to generate QR");
+    }
+  };
+
+  useEffect(() => {
+    generateQR();
+    return () => clearInterval(timerRef.current);
+  }, []);
+
+  return (
+    <div style={{ padding: 20, textAlign: "center" }}>
+      <h1>Your QR Code</h1>
+
+      {qrToken ? (
+        <div
+          style={{
+            background: "white",
+            padding: 20,
+            display: "inline-block",
+            marginTop: 20,
+          }}
+        >
+          <QRCodeCanvas value={qrToken} size={200} />
+        </div>
+      ) : (
+        <p>Generating...</p>
+      )}
+
+      <p style={{ marginTop: 15, fontSize: 14, color: "#666" }}>
+        Expires in: <strong>{remaining}s</strong>
+      </p>
+    </div>
+  );
+}
