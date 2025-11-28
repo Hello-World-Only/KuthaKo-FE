@@ -12,7 +12,6 @@ export default function ShowQR() {
     try {
       const res = await api.post("/qr/generate");
 
-      // backend response uses root-level fields, NOT "data"
       const data = res.data;
 
       setQrToken(data.qrToken);
@@ -21,6 +20,7 @@ export default function ShowQR() {
       const expiresIn = Math.floor(
         (new Date(data.expiresAt) - new Date()) / 1000
       );
+
       setRemaining(expiresIn);
 
       if (timerRef.current) clearInterval(timerRef.current);

@@ -25,9 +25,7 @@ export default function ScanQR() {
   }, [isScanning]);
 
   const scanFrame = () => {
-    if (!webcamRef.current) return;
-
-    const video = webcamRef.current.video;
+    const video = webcamRef.current?.video;
     if (!video || video.readyState !== 4) return;
 
     const canvas = canvasRef.current;
@@ -51,9 +49,7 @@ export default function ScanQR() {
 
   const handleScanResult = async (result) => {
     try {
-      const res = await api.post("/qr/scan", {
-        qrToken: result,
-      });
+      await api.post("/qr/scan", { qrToken: result });
 
       alert("Connection request sent!");
       navigate("/home");
@@ -69,7 +65,6 @@ export default function ScanQR() {
     <div className="flex flex-col items-center p-4 space-y-4">
       <h2 className="text-xl font-semibold">Scan QR Code</h2>
 
-      {/* Start Button */}
       {!isScanning && (
         <button
           onClick={() => setIsScanning(true)}
@@ -79,16 +74,15 @@ export default function ScanQR() {
         </button>
       )}
 
-      {/* Camera Box */}
       {isScanning && (
         <div className="relative w-72 h-72 rounded-lg overflow-hidden shadow">
           <Webcam
             ref={webcamRef}
             audio={false}
+            playsInline
             screenshotFormat="image/png"
             className="w-full h-full object-cover"
             videoConstraints={{ facingMode: "environment" }}
-            playsInline
           />
           <canvas
             ref={canvasRef}
