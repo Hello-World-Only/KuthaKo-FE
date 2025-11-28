@@ -9,20 +9,16 @@ export default function ScanQR() {
   const canvasRef = useRef(null);
   const navigate = useNavigate();
 
-  const [isScanning, setIsScanning] = useState(false);
   const [scanned, setScanned] = useState(false);
 
   useEffect(() => {
-    let interval;
-
-    if (isScanning) {
-      interval = setInterval(() => {
-        scanFrame();
-      }, 500);
-    }
+    // Start scanning immediately
+    const interval = setInterval(() => {
+      scanFrame();
+    }, 500);
 
     return () => clearInterval(interval);
-  }, [isScanning]);
+  }, []);
 
   const scanFrame = () => {
     const video = webcamRef.current?.video;
@@ -57,7 +53,6 @@ export default function ScanQR() {
       console.error("SCAN ERROR", err);
       alert("Invalid or expired QR");
       setScanned(false);
-      setIsScanning(false);
     }
   };
 
@@ -65,37 +60,23 @@ export default function ScanQR() {
     <div className="flex flex-col items-center p-4 space-y-4">
       <h2 className="text-xl font-semibold">Scan QR Code</h2>
 
-      {!isScanning && (
-        <button
-          onClick={() => setIsScanning(true)}
-          className="px-5 py-2 bg-blue-600 text-white rounded-lg"
-        >
-          Start Scan
-        </button>
-      )}
+      <div className="relative w-72 h-72 rounded-lg overflow-hidden shadow">
+        <Webcam
+          ref={webcamRef}
+          audio={false}
+          playsInline
+          screenshotFormat="image/png"
+          className="w-full h-full object-cover"
+          videoConstraints={{ facingMode: "environment" }}
+        />
 
-      {isScanning && (
-        <div className="relative w-72 h-72 rounded-lg overflow-hidden shadow">
-          <Webcam
-            ref={webcamRef}
-            audio={false}
-            playsInline
-            screenshotFormat="image/png"
-            className="w-full h-full object-cover"
-            videoConstraints={{ facingMode: "environment" }}
-          />
-          <canvas
-            ref={canvasRef}
-            className="absolute top-0 left-0 w-full h-full"
-          />
-        </div>
-      )}
+        <canvas
+          ref={canvasRef}
+          className="absolute top-0 left-0 w-full h-full"
+        />
+      </div>
 
-      {isScanning && (
-        <p className="text-gray-500 text-sm">
-          Point your camera at the QR code.
-        </p>
-      )}
+      <p className="text-gray-500 text-sm">Point your camera at the QR code.</p>
     </div>
   );
 }
