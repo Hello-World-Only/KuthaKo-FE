@@ -30,17 +30,23 @@ export default function Home() {
     switch (screen) {
       case "scan":
         return <ScanQR />;
+
       case "qr":
         return <ShowQR />;
+
       case "pending":
         return <PendingRequests />;
+
       case "connections":
         return <Connections />;
+
       case "profile":
         return <UserProfile />;
+
+      case "chat":
       default:
         return activeChat ? (
-          <ChatWindow chatId={activeChat} />
+          <ChatWindow activeChat={activeChat} setActiveChat={setActiveChat} />
         ) : (
           <div className="h-full flex items-center justify-center text-gray-400">
             Select a chat to start messaging
@@ -51,19 +57,21 @@ export default function Home() {
 
   return (
     <div className="h-screen w-full flex bg-[#f1f1f1]">
+      {/* LEFT SIDEBAR */}
       <LeftSidebar onNavigate={setScreen} user={user} />
 
-      {/* ChatList is visible when main screen is chat or connections (you can tweak) */}
+      {/* CHAT LIST — only shown on chat screen */}
       {screen === "chat" && (
         <ChatList
           activeChat={activeChat}
-          setActiveChat={(chatId) => {
-            setActiveChat(chatId);
+          setActiveChat={(chatObject) => {
+            setActiveChat(chatObject);
             setScreen("chat");
           }}
         />
       )}
 
+      {/* MAIN SCREEN */}
       <div className="flex-1 overflow-y-auto bg-white">{renderMain()}</div>
     </div>
   );
