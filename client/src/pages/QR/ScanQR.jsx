@@ -8,22 +8,26 @@ export default function ScanQR() {
   const webcamRef = useRef(null);
   const canvasRef = useRef(null);
   const navigate = useNavigate();
+
+  const [isScanning, setIsScanning] = useState(false);
   const [scanned, setScanned] = useState(false);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      scanFrame();
-    }, 500);
+    let interval;
+
+    if (isScanning) {
+      interval = setInterval(() => {
+        scanFrame();
+      }, 500);
+    }
 
     return () => clearInterval(interval);
-  }, []);
+  }, [isScanning]);
 
   const scanFrame = () => {
-    const webcam = webcamRef.current;
-    if (!webcam) return;
+    if (!webcamRef.current) return;
 
-    const video = webcam.video;
-
+    const video = webcamRef.current.video;
     if (!video || video.readyState !== 4) return;
 
     const canvas = canvasRef.current;
@@ -55,8 +59,9 @@ export default function ScanQR() {
       navigate("/home");
     } catch (err) {
       console.error("SCAN ERROR", err);
-      alert("Invalid QR");
+      alert("Invalid or expired QR");
       setScanned(false);
+      setIsScanning(false);
     }
   };
 
@@ -64,24 +69,39 @@ export default function ScanQR() {
     <div className="flex flex-col items-center p-4 space-y-4">
       <h2 className="text-xl font-semibold">Scan QR Code</h2>
 
-      <div className="relative w-72 h-72 rounded-lg overflow-hidden shadow">
-        <Webcam
-          ref={webcamRef}
-          audio={false}
-          screenshotFormat="image/png"
-          className="w-full h-full object-cover"
-          videoConstraints={{ facingMode: "environment" }}
-          playsInline // REQUIRED FOR SAMSUNG/ANDROID
-        />
-        <canvas
-          ref={canvasRef}
-          className="absolute top-0 left-0 w-full h-full"
-        />
-      </div>
+      {/* Start Button */}
+      {!isScanning && (
+        <button
+          onClick={() => setIsScanning(true)}
+          className="px-5 py-2 bg-blue-600 text-white rounded-lg"
+        >
+          Start Scan
+        </button>
+      )}
 
-      <p className="text-gray-500 text-sm">
-        Point your phone camera at the QR code on the other device.
-      </p>
+      {/* Camera Box */}
+      {isScanning && (
+        <div className="relative w-72 h-72 rounded-lg overflow-hidden shadow">
+          <Webcam
+            ref={webcamRef}
+            audio={false}
+            screenshotFormat="image/png"
+            className="w-full h-full object-cover"
+            videoConstraints={{ facingMode: "environment" }}
+            playsInline
+          />
+          <canvas
+            ref={canvasRef}
+            className="absolute top-0 left-0 w-full h-full"
+          />
+        </div>
+      )}
+
+      {isScanning && (
+        <p className="text-gray-500 text-sm">
+          Point your camera at the QR code.
+        </p>
+      )}
     </div>
   );
 }
