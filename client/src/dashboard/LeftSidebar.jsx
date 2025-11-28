@@ -28,7 +28,7 @@ export default function LeftSidebar() {
         {/* Scan QR */}
         <Scan
           className="w-6 h-6 cursor-pointer"
-          onClick={() => navigate("/qr/scan")}
+          onClick={() => navigate("/scan")}
         />
       </div>
 
