@@ -6,6 +6,14 @@ export default function LeftSidebar() {
   const navigate = useNavigate();
   const user = useAuthUser();
 
+  const handleQrClick = () => {
+    if (!user) {
+      navigate("/login"); // Not logged in → go to login
+      return;
+    }
+    navigate("/qr/scan"); // Logged in → go to scanner
+  };
+
   return (
     <div className="w-16 h-screen bg-white border-r flex flex-col items-center py-4">
       {/* --- TOP ICONS --- */}
@@ -14,20 +22,21 @@ export default function LeftSidebar() {
           className="w-6 h-6 cursor-pointer"
           onClick={() => navigate("/home")}
         />
+
         <MessageCircle
           className="w-6 h-6 cursor-pointer"
           onClick={() => navigate("/home")}
         />
+
         <QrCode
           className="w-6 h-6 cursor-pointer"
-          onClick={() => navigate("/qr")}
+          onClick={handleQrClick} // 👈 FIXED
         />
       </div>
 
-      {/* --- PUSH BOTTOM SECTION DOWN --- */}
       <div className="flex-1"></div>
 
-      {/* --- SETTINGS + AVATAR (BOTTOM) --- */}
+      {/* --- BOTTOM (SETTINGS + AVATAR) --- */}
       <div className="flex flex-col items-center gap-4 mb-4">
         <Settings
           className="w-6 h-6 cursor-pointer"
